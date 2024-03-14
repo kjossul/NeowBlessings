@@ -3,6 +3,10 @@ Neow has transformed into a cute little card! This is a mod for balatro that giv
 
 Requires [Steamodded](https://github.com/Steamopollys/Steamodded).
 
+# Install guide
+
+Download the whole repo as a .zip file and un-zip it in your mods folder. More information in the Steamodded link above.
+
 # Blessings list (WIP)
 
 Note that this list is just an initial stub, any feedback on balance changes, possible additions or removals are very welcome! Feel free to make a pull request.
