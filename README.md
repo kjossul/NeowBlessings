@@ -24,7 +24,7 @@ Note that this list is just an initial stub, any feedback on balance changes, po
 - Balance and playtesting
 
 # Screenshots
-![UI](Screenshots/UI.png)
+![UI](screenshots/UI.png)
 
 # My other mods
 
