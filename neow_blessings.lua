@@ -313,19 +313,43 @@ function SMODS.INIT.NeowBlessings()
             buttons[i] = UIBox_button{label = {blessings[j].desc}, button = 'blessing_' .. i, minw = 8}
             G.FUNCS['blessing_' .. i] = blessings[j].f
         end
-        -- todo: add exit button? or maybe remove the no_back flag. I personally prefer it without but let's see others opinion on this.
+        
         G.FUNCS.overlay_menu{
-            definition = create_UIBox_generic_options({ contents = buttons, no_back=true})
+            definition = createNeowBox(),
+            config = {no_esc = true}
         }
+        
+    end
+
+    -- Custom function to create two separate elements on the overlay menu, the box containing the blessings options and the Neow card
+    function createNeowBox()
+        -- todo: add exit button? or maybe remove the no_back flag. I personally prefer it without but let's see others opinion on this.
+        t =  create_UIBox_generic_options({ contents = buttons, no_back=true})
+        t.nodes[1] = {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
+
+            -- First, the blessings box
+            {n=G.UIT.C, config={align = "tm", padding = 0.3}, nodes={ {n=G.UIT.R, config={align = "cm"}, 
+                nodes={
+                    {n=G.UIT.O,
+                    -- todo: create localization strings
+                    config={object = DynaText({string = {"Choose your blessing"}, colours = {G.C.MONEY},shadow = true, float = true, scale = 1.5, pop_in = 0.4, maxw = 6.5})}
+                    }}},t.nodes[1]}}, 
+
+            -- Second, Neow card
+            {n=G.UIT.C, config={align = "cm", padding = 1}, nodes={
+                {n=G.UIT.R, config={align = "cm"}, nodes={
+                    {n=G.UIT.O, config={padding = 0, id = 'jimbo_spot', object = Moveable(0,0,G.CARD_W*1.1, G.CARD_H*1.1)}},
+                }}, 
+            }}
+            }
+        }
+        return t
     end
 
     function draw_blessings_overlay()
         G.SETTINGS.paused = true
         create_blessings_overlay()
-        local attach = {major = G.ROOM_ATTACH, type = 'cm', offset = {x = 8, y = 0}}
-        local pos = {x=attach.major.T.x + attach.major.T.w/2, y=attach.major.T.y - attach.major.T.h/2}
-        G.BLESSINGS_JIMBO = Card_Character(pos)
-        replace_jimbo_sprite()
+        
         table.insert(G.I.POPUP, G.BLESSINGS_JIMBO)
         table.insert(G.OVERLAY_MENU.children, G.BLESSINGS_JIMBO)
 
@@ -334,11 +358,15 @@ function SMODS.INIT.NeowBlessings()
             delay = 0.5,
             func = function()
                 G.CONTROLLER.interrupt.focus = true
+                G.BLESSINGS_JIMBO = Card_Character({x = 0, y = 5})
+                local spot = G.OVERLAY_MENU:get_UIE_by_ID('jimbo_spot')
+                spot.config.object:remove()
+                spot.config.object = G.BLESSINGS_JIMBO
+                replace_jimbo_sprite()
+                G.BLESSINGS_JIMBO.ui_object_updated = true
                 G.BLESSINGS_JIMBO:add_speech_bubble("nb_1", "tm", {quip=true})
-                G.BLESSINGS_JIMBO:set_alignment(attach)
                 G.BLESSINGS_JIMBO:say_stuff(5)
-                -- todo: how to make the bubble appear on top of the overlay? currently it sits in background.
-                -- table.insert(G.I.POPUP, G.BLESSINGS_JIMBO.children.speech_bubble)  -- doesn't work hmm
+
                 return true
             end
         }))
