@@ -23,7 +23,6 @@ Note that this list is just an initial stub, any feedback on balance changes, po
 
 # Future development
 - Make a better card for Neow
-- Find a way to put Neow's speech bubble in the foreground
 - Come up with blessings that give a drawback but also a big bonus, like in StS Curse for a Rare Colorless card, etc.
 - Balance and playtesting
 
