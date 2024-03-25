@@ -34,4 +34,6 @@ Note that this list is just an initial stub, any feedback on balance changes, po
 - [Better Stakes](https://github.com/kjossul/BetterStakes) - A mod for balatro that changes orange and gold stakes, making them easier and reducing the need to reset for a good start.
 
 # Changelog
+- New feat: Tooltips for blessings options that contain extra information or descriptions
+- Neow speech bubble bugfix.
 - Initial commit.

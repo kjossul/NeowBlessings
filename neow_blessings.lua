@@ -177,9 +177,9 @@ function SMODS.INIT.NeowBlessings()
         ["Chicot"] = {effect = "Effect", rarity = "Legendary"},
         ["Perkeo"] = {effect = "Effect", rarity = "Legendary"},
     }    
-
     local blessings = {
         {
+            key = "common_mult_joker",
             desc = "Get a common mult Joker",
             f = function()
                 create_joker("Mult", 0)
@@ -187,6 +187,7 @@ function SMODS.INIT.NeowBlessings()
             end
         },
         {
+            key = "common_chips_joker",
             desc = "Get a common chips Joker",
             f = function()
                 create_joker("Chips", 0)
@@ -194,6 +195,7 @@ function SMODS.INIT.NeowBlessings()
             end
         },
         {
+            key = "uncommon_joker",
             desc = "Get an uncommon Joker",
             f = function()
                 create_joker(nil, 0.8)  -- (rarity > 0.95 and 3) or (rarity > 0.7 and 2) or 1
@@ -201,6 +203,7 @@ function SMODS.INIT.NeowBlessings()
             end
         },
         {
+            key = "ten_dollars",
             desc = "Get $10",
             f = function()
                 G.GAME.dollars = G.GAME.dollars + 10
@@ -208,13 +211,26 @@ function SMODS.INIT.NeowBlessings()
             end
         },
         {
+            key = "mega_arcana_pack",
+            tooltip = {
+                "Choose 1 of up to",
+                "2 Tarot cards to",
+                "be used immediately"
+            },
             desc = "Open a Mega Arcana pack",
             f = function()
                 create_booster('arcana', 'mega')
                 G.FUNCS:exit_overlay_menu()
             end
+            
         },
         {
+           key = "mega_celestial_pack",
+            tooltip = {
+                "Choose 1 of up to",
+                "2 Planet cards to",
+                "be used immediately"
+            },
             desc = "Open a Mega Celestial pack",
             f = function()
                 create_booster('celestial', 'mega')
@@ -222,6 +238,12 @@ function SMODS.INIT.NeowBlessings()
             end
         },
         {
+            key = "mega_spectral_pack",
+            tooltip = {
+                "Choose 1 of up to",
+                "2 Spectral cards to",
+                "be used immediately"
+            },
             desc = "Open a Spectral pack",
             f = function()
                 create_booster('spectral', 'normal')
@@ -229,6 +251,12 @@ function SMODS.INIT.NeowBlessings()
             end
         },
         {
+            key = "mega_standard_pack",
+            tooltip = {
+                "Choose 1 of up to",
+                "2 Playing cards to",
+                "add to your deck"
+            },
             desc = "Open a Mega Standard pack",
             f = function()
                 create_booster('standard', 'mega')
@@ -236,6 +264,11 @@ function SMODS.INIT.NeowBlessings()
             end
         },
         {
+            key = "jumbo_buffoon_pack",
+            tooltip = {
+                "Choose 1 of up to",
+                "2 Joker cards"
+            },
             desc = "Open a Jumbo Buffoon pack",
             f = function()
                 create_booster('buffoon', 'jumbo')
@@ -243,7 +276,32 @@ function SMODS.INIT.NeowBlessings()
             end
         },          
     }
-
+    local tooltips = {
+        ['mega_arcana_pack'] = {
+            "Choose 1 of up to",
+            "2 Tarot cards to",
+            "be used immediately"
+        },
+        ['mega_celestial_pack'] = {
+                "Choose 1 of up to",
+                "2 Planet cards to",
+                "be used immediately"
+        },
+        ['mega_spectral_pack'] = {
+                "Choose 1 of up to",
+                "2 Spectral cards to",
+                "be used immediately"
+        },
+        ['mega_standard_pack'] = {
+                "Choose 1 of up to",
+                "2 Playing cards to",
+                "add to your deck"
+        },
+        ['jumbo_buffoon_pack'] = {
+                "Choose 1 of up to",
+                "2 Joker cards"
+        },  
+    }
     function create_joker(effect, rarity)
         pool, pool_key = get_current_pool('Joker', rarity)
         choices = {}
@@ -304,13 +362,64 @@ function SMODS.INIT.NeowBlessings()
         jimbo.children.card.hover = Node.hover
     end
 
+    -- utility function to compare the contents of two tables
+    function equals(o1, o2, ignore_mt)
+        if o1 == o2 then return true end
+        local o1Type = type(o1)
+        local o2Type = type(o2)
+        if o1Type ~= o2Type then return false end
+        if o1Type ~= 'table' then return false end
+    
+        if not ignore_mt then
+            local mt1 = getmetatable(o1)
+            if mt1 and mt1.__eq then
+                --compare using built in method
+                return o1 == o2
+            end
+        end
+    
+        local keySet = {}
+    
+        for key1, value1 in pairs(o1) do
+            local value2 = o2[key1]
+            if value2 == nil or equals(value1, value2, ignore_mt) == false then
+                return false
+            end
+            keySet[key1] = true
+        end
+    
+        for key2, _ in pairs(o2) do
+            if not keySet[key2] then return false end
+        end
+        return true
+    end
+
     function create_blessings_overlay(forced_blessing_index)
         buttons = {}
         blessings_indexes = random_n(4, 1, #blessings)
+
         for i=1, 4 do 
             -- forced blessing index useful to debug blessing functions during development, otherwise pick at random
             j = forced_blessing_index and forced_blessing_index or blessings_indexes[i]
-            buttons[i] = UIBox_button{label = {blessings[j].desc}, button = 'blessing_' .. i, minw = 8}
+            -- checks if the tooltip exists in the blessings table
+            if blessings[j].tooltip then
+                -- checks if the tooltip should be created and if the blessings table contains the same content
+                -- @typhoonbro note: I couldn't find a better way of checking if the choosen blessing should create a tooltip or not
+                if equals(blessings[j].tooltip, tooltips[blessings[j].key]) then
+                    buttons[i] = {n=G.UIT.R, config={align = "cm", padding = 0.1} , nodes={
+                        Blessings_UIBox_button{id = 'blessing_' .. i, label = {blessings[j].desc}, button = 'blessing_' .. i, minw = 8,
+                        on_demand_tooltip = { text = tooltips[blessings[j].key]} 
+                        }
+                    }   
+                }
+                end
+            else
+                buttons[i] = {n=G.UIT.R, config={align = "cm", padding = 0.1} , nodes={
+                    Blessings_UIBox_button{id = 'blessing_' .. i, label = {blessings[j].desc}, button = 'blessing_' .. i, minw = 8
+                    }
+                }
+            }
+            end
             G.FUNCS['blessing_' .. i] = blessings[j].f
         end
         
@@ -323,6 +432,7 @@ function SMODS.INIT.NeowBlessings()
 
     -- Custom function to create two separate elements on the overlay menu, the box containing the blessings options and the Neow card
     function createNeowBox()
+       
         -- todo: add exit button? or maybe remove the no_back flag. I personally prefer it without but let's see others opinion on this.
         t =  create_UIBox_generic_options({ contents = buttons, no_back=true})
         t.nodes[1] = {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
@@ -330,7 +440,7 @@ function SMODS.INIT.NeowBlessings()
             -- First, the blessings box
             {n=G.UIT.C, config={align = "tm", padding = 0.3}, nodes={ {n=G.UIT.R, config={align = "cm"}, 
                 nodes={
-                    {n=G.UIT.O,
+                    {n=G.UIT.O, 
                     -- todo: create localization strings
                     config={object = DynaText({string = {"Choose your blessing"}, colours = {G.C.MONEY},shadow = true, float = true, scale = 1.5, pop_in = 0.4, maxw = 6.5})}
                     }}},t.nodes[1]}}, 
@@ -347,7 +457,7 @@ function SMODS.INIT.NeowBlessings()
     end
 
     function draw_blessings_overlay()
-        G.SETTINGS.paused = true
+        -- G.SETTINGS.paused = true
         create_blessings_overlay()
         
         table.insert(G.I.POPUP, G.BLESSINGS_JIMBO)
@@ -371,6 +481,72 @@ function SMODS.INIT.NeowBlessings()
             end
         }))
     end
+
+    -- custom uibox_button to accept the tooltip param and use the source UIElement hover behavior
+    function Blessings_UIBox_button(args)
+        args = args or {}
+        args.button = args.button or "exit_overlay_menu"
+        args.func = args.func or nil
+        args.colour = args.colour or G.C.RED
+        args.choice = args.choice or nil
+        args.chosen = args.chosen or nil
+        args.label = args.label or {'LABEL'}
+        args.minw = args.minw or 2.7
+        args.maxw = args.maxw or (args.minw - 0.2)
+        if args.minw < args.maxw then args.maxw = args.minw - 0.2 end
+        args.minh = args.minh or 0.9
+        args.scale = args.scale or 0.5
+        args.focus_args = args.focus_args or nil
+        args.text_colour = args.text_colour or G.C.UI.TEXT_LIGHT
+        local but_UIT = args.col == true and G.UIT.C or G.UIT.R
+      
+        local but_UI_label = {}
+      
+        local button_pip = nil
+        for k, v in ipairs(args.label) do 
+          if k == #args.label and args.focus_args and args.focus_args.set_button_pip then 
+            button_pip ='set_button_pip'
+          end
+          table.insert(but_UI_label, {n=G.UIT.R, config={align = "cm", padding = 0, minw = args.minw, maxw = args.maxw}, nodes={
+            {n=G.UIT.T, config={text = v, scale = args.scale, colour = args.text_colour, shadow = args.shadow, focus_args = button_pip and args.focus_args or nil, func = button_pip, ref_table = args.ref_table}}
+          }})
+        end
+      
+        if args.count then 
+          table.insert(but_UI_label, 
+          {n=G.UIT.R, config={align = "cm", minh = 0.4}, nodes={
+            {n=G.UIT.T, config={scale = 0.35,text = args.count.tally..' / '..args.count.of, colour = {1,1,1,0.9}}}
+          }}
+          )
+        end
+      
+        return 
+        {n= but_UIT, config = {align = 'cm'}, nodes={
+        {n= G.UIT.C, config={
+            align = "cm",
+            padding = args.padding or 0,
+            r = 0.1,
+            hover = true,
+            colour = args.colour,
+            one_press = args.one_press,
+            button = (args.button ~= 'nil') and args.button or nil,
+            choice = args.choice,
+            chosen = args.chosen,
+            focus_args = args.focus_args,
+            minh = args.minh - 0.3*(args.count and 1 or 0),
+            shadow = true,
+            func = args.func,
+            id = args.id,
+            back_func = args.back_func,
+            ref_table = args.ref_table,
+            mid = args.mid,
+            tooltip = args.tooltip,
+            on_demand_tooltip = args.on_demand_tooltip,
+          }, nodes=
+          but_UI_label
+          }}}
+      end
+
 
     local game_start_run_ref = Game.start_run
     function Game.start_run(self, args)
