@@ -12,15 +12,10 @@ function SMODS.INIT.NeowBlessings()
     local mod_name = "NeowBlessings"
     local sprite_neow = SMODS.Sprite:new(mod_name, SMODS.findModByID(mod_name).path, "j_neow.png", 71, 95, "asset_atli")
     sprite_neow:register()
-    G.P_CENTERS.j_neow = {
-        order = 0,
-        name = "neow",
-        set = "",
-        config = {},
-        pos = { x = 0, y = 0 },
-        atlas = mod_name
+    local j_neow = {
+        order = 151,  unlocked = true,   start_alerted = true, discovered = true,  blueprint_compat = true, eternal_compat = true, rarity = 1, cost = 2, name = "neow", pos = {x=0,y=0}, set = "Default", effect = "Base", cost_mult = 1.0, config = {}, atlas= mod_name
     }
-
+    
     G.localization.misc.quips.nb_1 = {"Greetings...", "Choose..."}
     init_localization()
 
@@ -348,7 +343,7 @@ function SMODS.INIT.NeowBlessings()
         -- remove old Jimbo
         jimbo = G.BLESSINGS_JIMBO
         jimbo.children.card:remove()
-        jimbo.children.card = Card(jimbo.T.x, jimbo.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, G.P_CENTERS.j_neow, {bypass_discovery_center = true})
+        jimbo.children.card = Card(jimbo.T.x, jimbo.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, j_neow, {bypass_discovery_center = true})
         jimbo.children.card.states.visible = false
         jimbo.children.card:start_materialize({G.C.BLUE, G.C.WHITE, G.C.RED})
         jimbo.children.card:set_alignment{
@@ -432,7 +427,7 @@ function SMODS.INIT.NeowBlessings()
 
     -- Custom function to create two separate elements on the overlay menu, the box containing the blessings options and the Neow card
     function createNeowBox()
-       
+        
         -- todo: add exit button? or maybe remove the no_back flag. I personally prefer it without but let's see others opinion on this.
         t =  create_UIBox_generic_options({ contents = buttons, no_back=true})
         t.nodes[1] = {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
@@ -469,10 +464,10 @@ function SMODS.INIT.NeowBlessings()
             func = function()
                 G.CONTROLLER.interrupt.focus = true
                 G.BLESSINGS_JIMBO = Card_Character({x = 0, y = 5})
+                replace_jimbo_sprite()
                 local spot = G.OVERLAY_MENU:get_UIE_by_ID('jimbo_spot')
                 spot.config.object:remove()
                 spot.config.object = G.BLESSINGS_JIMBO
-                replace_jimbo_sprite()
                 G.BLESSINGS_JIMBO.ui_object_updated = true
                 G.BLESSINGS_JIMBO:add_speech_bubble("nb_1", "tm", {quip=true})
                 G.BLESSINGS_JIMBO:say_stuff(5)
