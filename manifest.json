@@ -1,0 +1,7 @@
+{
+    "name": "NeowBlessings",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/kjossul/NeowBlessings",
+    "description": "Choose between 4 blessings at the start of your run, inspired from Slay the Spire.",
+    "dependencies": []
+}
